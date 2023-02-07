@@ -1,0 +1,14 @@
+$info = Get-ComputerInfo
+$netInfo = Get-NetIPAddress
+
+$myPC = [PSCustomObject]@{
+    Bios = $info | select -ExpandProperty BiosCaption
+    Name = $info | select -ExpandProperty CsName
+    Serial = $info | select -ExpandProperty BiosSeralNumber
+    EthernetIP = $netInfo | where{($_.InterfaceAlias -like "Ethernet*" -and $_.AddressFamily -eq "IPv4" )} | select -expandProperty IPAddress
+    WifiIP = $netInfo | where{($_.InterfaceAlias -like "Wi-Fi" -and $_.AddressFamily -eq "IPv4" )} | select -expandProperty IPAddress
+}
+foreach($object_properties in $myPC.PSObject.Properties){
+    $out = "The " + $object_properties.Name + " is " + $object_properties.Value
+    echo $out
+}
