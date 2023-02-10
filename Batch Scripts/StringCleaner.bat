@@ -21,3 +21,10 @@ set out=!_drive!
 	)
 )
 echo New string: %out%
+
+#basic string replacement
+
+set a=C:\path\
+set b=file
+set c=%a%%b% 		#	=	c:\path\file
+call echo %c:%b%=% 	#	=	c:\path
