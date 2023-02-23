@@ -1,0 +1,11 @@
+#Win32_VideoController
+#https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-videocontroller
+#Get Graphics driver info
+Get-WmiObject  Win32_VideoController
+
+
+#Monitor Info
+Get-WmiObject  WmiMonitorID -Namespace root\wmi
+
+#Drivers for Monitors and Graphics
+Get-WmiObject Win32_PnPSignedDriver | where{($_.DeviceClass -eq "Display" -or $_.DeviceClass -eq "Monitor" )} | SELECT DeviceName,INFName,HardwareID
