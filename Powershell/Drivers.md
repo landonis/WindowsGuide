@@ -2,6 +2,17 @@
 
      Get-CIMInstance Win32_PNPEntity |Where-Object{$_.Status -eq "Error"} | Select Name
 
+     Get-PNPDevice |where-object{$_.Status -like "Error"} |Select Name
+ 
+## Disable and enable PNP Devices with errors
+     
+     $PNPDeviceErrors = Get-PNPDevice |where-object{$_.Status -like "Error"} | Select -expandProperty Name
+     foreach ($deviceName in $PNPDeviceErrors) {
+          $InstanceID = Get-PNPDevice | where-object{$_.Name -eq $deviceName} | Select -ExpandProperty InstanceId
+          Disable-PnpDevice -InstanceId $InstanceID -Confirm:$false
+          Enable-PnpDevice -InstanceId $InstanceID -Confirm:$false
+     }
+
 ## Extract a print driver by name
      
      $driverName = ""
