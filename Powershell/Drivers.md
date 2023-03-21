@@ -13,6 +13,12 @@
           Enable-PnpDevice -InstanceId $InstanceID -Confirm:$false
      }
 
+## pnputil
+     pnputil /enum-devices /problem
+     pnputil /delete-driver 'hdaudio.inf' /uninstall
+     pnputil /scan-devices
+     
+
 ## Extract a print driver by name
      
      $driverName = ""
