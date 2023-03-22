@@ -9,8 +9,10 @@
      $PNPDeviceErrors = Get-PNPDevice |where-object{$_.Status -like "Error"} | Select -expandProperty Name
      foreach ($deviceName in $PNPDeviceErrors) {
           $InstanceID = Get-PNPDevice | where-object{$_.Name -eq $deviceName} | Select -ExpandProperty InstanceId
-          Disable-PnpDevice -InstanceId $InstanceID -Confirm:$false
-          Enable-PnpDevice -InstanceId $InstanceID -Confirm:$false
+          foreach($id in $InstanceId) {
+               Disable-PnpDevice -InstanceId $id -Confirm:$false
+               Enable-PnpDevice -InstanceId $id -Confirm:$false
+          }
      }
 
 ## pnputil
