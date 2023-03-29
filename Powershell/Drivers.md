@@ -1,9 +1,10 @@
 When a device has an error, the first thing to try is to run the disable and enable PNP devices with errors script. If that doesn't seem to work, you can get more information from the device by getting the problem code:
 
-     Get-PNPDevice |where-object{$_.Status -like "Error"} | Select-Object Name,Problem
+    Get-PNPDevice |where-object{$_.Status -like "Error"} | Select-Object Name,Problem
      
 Another option is to use pnputil to enumerate the problem devices. delete and uninstall drivers, then scan-devices and check if you still have errors.
 
+## List and optionally remove lowerfilters from driver classes
 
 ## List error CIMInstance
 
