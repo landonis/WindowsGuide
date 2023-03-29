@@ -7,7 +7,8 @@ Another option is to use pnputil to enumerate the problem devices. delete and un
 ## List and optionally remove lowerfilters from driver classes
 
     $hive_list = Get-ChildItem -Path HKLM:\SYSTEM\CurrentControlSet\Control\Class\ | Where-Object{$_.Property -contains 'LowerFilters'} | Select-Object -ExpandProperty Name
-
+    #optional classes to ignore asking to delete lower filters
+    $ignore_classes = "Volume","DiskDrive"
     foreach ($hive in $hive_list) {
         #get a list of registry values under the key with a LowerFilter
         $Property = Get-ItemProperty -Path Registry::$hive 
@@ -17,15 +18,20 @@ Another option is to use pnputil to enumerate the problem devices. delete and un
         $UpperFilters = $Property | Select-Object -ExpandProperty UpperFilters
         $Class = $Property | Select-Object -ExpandProperty Class
 
-        Write-Host "Lower Filters found on hive:`n$hive"
-        Write-Host "Class $Class`nUpper Filters present:`n`t$UpperFilters`nFound Lower Filters:`n`t$LowerFilters`n" 
-        $c = Read-Host -Prompt 'Remove Lower Filters? y/n'
-        if ($c -eq 'y') {
-            #Set LowerFilters to empty string
-            Remove-ItemProperty -Path $hive -Name "LowerFilters" -Force
-        
+        if ($ignore_classes -NotContains $Class) {
+            Write-Host "Lower Filters found on hive:`n$hive"
+            Write-Host "Class $Class`nUpper Filters present:`n`t$UpperFilters`nFound Lower Filters:`n`t$LowerFilters`n" 
+            $c = Read-Host -Prompt 'Remove Lower Filters? y/n'
+            if ($c -eq 'y') {
+                #Set LowerFilters to empty string
+                Remove-ItemProperty -Path $hive -Name "LowerFilters" -Force
+
+            } else {
+                Write-Host "Leaving $LowerFilters"
+            }
         } else {
-            Write-Host "Leaving $LowerFilters"
+        $Name = $Property.PSChildName
+        Write-Host "Ignoring hive $Name due to ignore class rule - '$Class' `r`n"
         }
     }
 
