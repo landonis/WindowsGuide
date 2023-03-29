@@ -1,3 +1,10 @@
+When a device has an error, the first thing to try is to run the disable and enable PNP devices with errors script. If that doesn't seem to work, you can get more information from the device by getting the problem code:
+
+     Get-PNPDevice |where-object{$_.Status -like "Error"} | Select-Object Name,Problem
+     
+Another option is to use pnputil to enumerate the problem devices. delete and uninstall drivers, then scan-devices and check if you still have errors.
+
+
 ## List error CIMInstance
 
      Get-CIMInstance Win32_PNPEntity |Where-Object{$_.Status -eq "Error"} | Select Name
@@ -6,7 +13,7 @@
  
 ## Disable and enable PNP Devices with errors
      
-    $PNPDeviceErrors = Get-PNPDevice |where-object{$_.Status -like "Error"} | Select -expandProperty Name
+    $PNPDeviceErrors = Get-PNPDevice |where-object{$_.Status -like "Error"} | Select-Object Name
     foreach ($deviceName in $PNPDeviceErrors) {
          $InstanceID = Get-PNPDevice | where-object{$_.Name -eq $deviceName} | Select -ExpandProperty InstanceId
          foreach($id in $InstanceId) {
@@ -22,7 +29,7 @@
 
 ## pnputil
      pnputil /enum-devices /problem
-     pnputil /delete-driver 'hdaudio.inf' /uninstall
+     pnputil /delete-driver 'oem.inf' /uninstall
      pnputil /scan-devices
      
 
