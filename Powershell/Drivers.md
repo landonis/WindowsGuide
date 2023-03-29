@@ -6,14 +6,14 @@
  
 ## Disable and enable PNP Devices with errors
      
-     $PNPDeviceErrors = Get-PNPDevice |where-object{$_.Status -like "Error"} | Select -expandProperty Name
-     foreach ($deviceName in $PNPDeviceErrors) {
-          $InstanceID = Get-PNPDevice | where-object{$_.Name -eq $deviceName} | Select -ExpandProperty InstanceId
-          foreach($id in $InstanceId) {
-               Disable-PnpDevice -InstanceId $id -Confirm:$false
-               Enable-PnpDevice -InstanceId $id -Confirm:$false
-          }
-     }
+    $PNPDeviceErrors = Get-PNPDevice |where-object{$_.Status -like "Error"} | Select -expandProperty Name
+    foreach ($deviceName in $PNPDeviceErrors) {
+         $InstanceID = Get-PNPDevice | where-object{$_.Name -eq $deviceName} | Select -ExpandProperty InstanceId
+         foreach($id in $InstanceId) {
+              Disable-PnpDevice -InstanceId $id -Confirm:$false
+              Enable-PnpDevice -InstanceId $id -Confirm:$false
+         }
+    }
 ## Remove PNP Monitor Devices not Present
      $instanceId = Get-PNPDevice |where-object{$_.Problem -like "CM_PROB_PHANTOM" -and $_.InstanceId -like "*Display*"} |Select -ExpandProperty InstanceID
      foreach($id in $InstanceId) { write-host $id
