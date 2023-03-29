@@ -6,6 +6,29 @@ Another option is to use pnputil to enumerate the problem devices. delete and un
 
 ## List and optionally remove lowerfilters from driver classes
 
+    $hive_list = Get-ChildItem -Path HKLM:\SYSTEM\CurrentControlSet\Control\Class\ | Where-Object{$_.Property -contains 'LowerFilters'} | Select-Object -ExpandProperty Name
+
+    foreach ($hive in $hive_list) {
+        #get a list of registry values under the key with a LowerFilter
+        $Property = Get-ItemProperty -Path Registry::$hive 
+   
+        #Set Variables for property values wanted
+        $LowerFilters = $Property | Select-Object -ExpandProperty LowerFilters
+        $UpperFilters = $Property | Select-Object -ExpandProperty UpperFilters
+        $Class = $Property | Select-Object -ExpandProperty Class
+
+        Write-Host "Lower Filters found on hive:`n$hive"
+        Write-Host "Class $Class`nUpper Filters present:`n`t$UpperFilters`nFound Lower Filters:`n`t$LowerFilters`n" 
+        $c = Read-Host -Prompt 'Remove Lower Filters? y/n'
+        if ($c -eq 'y') {
+            #Set LowerFilters to empty string
+            Remove-ItemProperty -Path $hive -Name "LowerFilters" -Force
+        
+        } else {
+            Write-Host "Leaving $LowerFilters"
+        }
+    }
+
 ## List error CIMInstance
 
      Get-CIMInstance Win32_PNPEntity |Where-Object{$_.Status -eq "Error"} | Select Name
