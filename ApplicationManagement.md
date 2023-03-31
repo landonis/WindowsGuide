@@ -3,22 +3,22 @@
 ## Remove an msi or program using get-Package/uninstall string
 
     $search_app = ""
-
+    $ignore = ""
     $app_list = Get-Package | Where-Object {(($_.ProviderName -eq 'Programs') -or ($_.ProviderName -eq 'msi')) -and ($_.Name -like "*$search_app*")}
-
     foreach ($app in $app_list) {
-        $full_name = $app | Select-Object Name
-        Write-Host "Scan found app:`n$full_name`,Uninstall:`n$uninstall"
-        pause
-        if ($app.ProviderName -eq 'msi') {
-            Uninstall-Package -Name $full_name -Force -Scope AllUsers -Confirm
-        } elseif ($app.ProviderName -eq 'Programs') {
-            $uninstall = $app.Meta.Attributes["UninstallString"]
-            Start-Process -FilePath cmd.exe -ArgumentList '/c', "$uninstall /s" -Wait
+        $full_name = $app | Select-Object -ExpandProperty Name
+        Write-Host "Scan found $($app.ProviderName) app:`n$full_name `nUninstall string:`n$uninstall"
+        If ($full_name -ne $ignore) {
+            if ($app.ProviderName -eq 'msi') {
+            Uninstall-Package $app -Force -Scope AllUsers -Confirm
+            } elseif ($app.ProviderName -eq 'Programs') {
+                $uninstall = $app.Meta.Attributes["UninstallString"]
+                Start-Process -FilePath cmd.exe -ArgumentList '/c', "$uninstall /s" -Wait
+            }
         }
     }
-    $post_scan = Get-Package | Where-Object {(($_.ProviderName -eq 'Programs') -or ($_.ProviderName -eq 'msi')) -and ($_.Name -like "*$search_app*")} | Select -ExpandProperty Name
-    Write-Host "Post App presence for $search_app :`n $post_scan" 
+    
+
 
 ## Programs
     Get-Package | Where-Object {($_.ProviderName -eq 'Programs') -or ($_.ProviderName -eq 'msi')} | Select-Object Name
