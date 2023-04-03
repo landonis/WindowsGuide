@@ -1,8 +1,12 @@
 # Exchange Online Powershell
 Commands will use these placeholder variables:
+
 > $target = Placeholder for a group or account identifier
+
 > $user = Placeholder for the users identifier
+
 > $accessRights = Placeholder for the valid access rights in the command
+
 ## Logging in
 
 ### Start A Session
