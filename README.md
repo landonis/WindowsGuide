@@ -1,5 +1,5 @@
 # WindowsGuide
-A Powershell quick reference for setup, administration, information, and troubleshooting
+A Powershell quick reference
 
 ## Drivers.md
 
