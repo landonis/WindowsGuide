@@ -9,6 +9,7 @@
     foreach ($app in $app_list) {
         $full_name = $app | Select-Object -ExpandProperty Name
         $uninstall_string = $app.Meta.Attributes["UninstallString"]
+        $product_code = $app.meta.Attributes["ProductCode"]
         Write-Output "Scan found $($app.ProviderName) app:`n$full_name `nUninstall string:`n$uninstall_string"
         If ($full_name -ne $ignore) {
             if ($app.ProviderName -eq 'msi') {
@@ -24,11 +25,11 @@
 #### msiexec/productCode
 
     $keyword = ""
-    $matched_drivers = get-package | where-object{$_.name -like "*$($keyword)*"}
-    Write-Output "Found drivers: $($drivers)"
-    foreach ($driver in $matched_drivers){
-        Write-Output "Running msiexec on $($driver.Name)
-        $product_code = $driver | select -expand meta | select -expand Attributes | select -expand Values
+    $matched_apps = get-package | where-object{($_.ProviderName -eq 'msi') -and ($_.name -like "*$($keyword)*"}
+    Write-Output "Found apps: $($matched_apps)"
+    foreach ($app in $matched_apps){
+        Write-Output "Running msiexec on $($app.Name)
+        $product_code = $app.meta.Attributes["ProductCode"]
         msiexec /x $product_code /norestart /qn /passive
     }
 
