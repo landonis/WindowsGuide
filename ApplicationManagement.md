@@ -12,7 +12,8 @@
         Write-Output "Scan found $($app.ProviderName) app:`n$full_name `nUninstall string:`n$uninstall_string"
         If ($full_name -ne $ignore) {
             if ($app.ProviderName -eq 'msi') {
-            Uninstall-Package $app -Force -Scope AllUsers -Confirm
+                Uninstall-Package $app -Force -Scope AllUsers -Confirm
+                
             } elseif ($app.ProviderName -eq 'Programs') {
                 $uninstall_return = (Start-Process -FilePath cmd.exe -ArgumentList '/c', "$uninstall /s" -Wait -Passthrough).ExitCode
                 Write-Output "uninstall process for $full_name returned $uninstall_return"
