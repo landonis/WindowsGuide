@@ -1,6 +1,7 @@
 # collection of application management commands
 
-## Remove an msi or program using get-Package/uninstall string
+## Remove an msi or program 
+#### get-Package/uninstall string
 
     $search_app = ""
     $ignore = ""
@@ -13,11 +14,22 @@
             Uninstall-Package $app -Force -Scope AllUsers -Confirm
             } elseif ($app.ProviderName -eq 'Programs') {
                 $uninstall = $app.Meta.Attributes["UninstallString"]
-                Start-Process -FilePath cmd.exe -ArgumentList '/c', "$uninstall /s" -Wait
+                $uninstall_return = (Start-Process -FilePath cmd.exe -ArgumentList '/c', "$uninstall /s" -Wait -Passthrough).ExitCode
+                Write-Host "uninstall process for $full_name returned $uninstall_return"
             }
         }
     }
     
+#### msiexec/productCode
+
+    $keyword = ""
+    $matched_drivers = get-package | where-object{$_.name -like "*$($keyword)*"}
+    Write-Output "Found drivers: $($drivers)"
+    foreach ($driver in $matched_drivers){
+        Write-Output "Running msiexec on $($driver.Name)
+        $product_code = $driver | select -expand meta | select -expand Attributes | select -expand Values
+        msiexec /x $product_code /norestart /qn /passive
+    }
 
 
 ## Programs
