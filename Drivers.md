@@ -51,6 +51,23 @@ Another option is to use pnputil to enumerate the problem devices. delete and un
               Enable-PnpDevice -InstanceId $id -Confirm:$false
          }
     }
+
+## Get current display driver inf
+    $controller = Get-WMIObject Win32_VideoController
+    $infName = $controller.InfFilename
+    if ($infName -ne $null)
+    { 
+        $driver = Get-WmiObject Win32_PNPSignedDriver | Where-Object { $_.InfName -eq $infName}
+        Write-Output "Video Controller:`r`n$($controller.Name)`r`nUsing Driver:"
+        $driver
+    }
+    else
+    {
+        throw "No infName found"
+    }
+
+
+
 ## Remove PNP Monitor Devices not Present
      $instanceId = Get-PNPDevice |where-object{$_.Problem -like "CM_PROB_PHANTOM" -and $_.InstanceId -like "*Display*"} |Select -ExpandProperty InstanceID
      foreach($id in $InstanceId) { write-host $id
