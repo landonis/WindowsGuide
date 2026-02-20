@@ -1,0 +1,66 @@
+#Can use as a script or copy-paste into powershell terminal
+
+$searchPathStr = "C:\" # Add whatever path you want to search here
+$skipPaths = @("C:\Windows") # Put full path in string, escape character is back colon `
+$minimumMBInReport = 1 # Dont include all the ones that are less than a MB
+$depth = 3 # This is for the output file, itll print C:\ C:\Windows C:\Windows\System32 and all the other recursive files, only up to this number
+$outputPath = "C:\installers\output.csv" # you can change where it goes here
+function Get-DirectorySizeObject {
+    param (
+        [Parameter(Mandatory)]
+        [string]$Path,
+        [int]$MaxDepth = [int]::MaxValue,
+        [int]$CurrentDepth = 0
+    )
+    if (-not $Path) { return $null }
+    try {
+        $item = Get-Item -Path $Path -Force
+    } catch {
+        Write-Error "Failed to find: $Path — $($_.Exception.Message)"
+        return $null
+    }
+    $obj = [PSCustomObject]@{
+        Name     = $item.Name
+        FullPath = $item.FullName
+        Size     = 0
+        Children = @()
+    }
+    if ($item.PSIsContainer -and $CurrentDepth -lt $MaxDepth) {
+        try{
+            $children = Get-ChildItem -Path $item.FullName -Force -ErrorAction Stop
+        }catch{continue}
+
+        foreach ($child in $children) {
+            if ($child.PSIsContainer) {
+                if ($skipPaths -contains $child.FullName.TrimEnd('\')) { continue }
+                $childObj = Get-DirectorySizeObject -Path $child.FullName -MaxDepth $MaxDepth -CurrentDepth ($CurrentDepth + 1)
+                if ($childObj) {
+                    $obj.Children += $childObj
+                    $obj.Size += $childObj.Size  # use $childObj
+                }
+            } else {
+                $obj.Size += $child.Length / 1MB  # use $child.Length
+            }
+        }
+        $obj.Size = [math]::Round($obj.Size, 2)
+    } elseif (-not $item.PSIsContainer) {
+        $obj.Size = [math]::Round($item.Length / 1MB, 2)
+    }
+    return $obj
+}
+function Flatten-DirectorySizeObject {
+    param (
+        $Node,
+        [int]$FlatMaxDepth = [int]::MaxValue,
+        [int]$CurrentDepth = 0
+    )
+    $Node | Select-Object Name, FullPath, Size
+    if ($CurrentDepth -ge ($FlatMaxDepth-1)) { return }
+    foreach ($child in $Node.Children) {
+        Flatten-DirectorySizeObject -Node $child -FlatMaxDepth $FlatMaxDepth -CurrentDepth ($CurrentDepth + 1)
+    }
+}
+
+$result = Get-DirectorySizeObject -Path $searchPathStr -MaxDepth 20
+$out = Flatten-DirectorySizeObject -Node $result -FlatMaxDepth $depth | Sort-Object Size -Descending | Where-Object -Property Size -ge $minimumMBInReport
+$out | Export-Csv -Path "$outputPath\output.csv" -NoTypeInformation
